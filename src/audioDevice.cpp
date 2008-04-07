@@ -60,7 +60,7 @@ mode (mode)
 		case RECORD:
 			if (jack)
 				jdevice =
-				  new JackClient ("jacktrip",//APP_NAME, //*JPC Hack, need to fix later
+					new JackClient (APP_NAME,
 							audioInfo->
 							getNumChans (),
 							audioInfo->
@@ -85,7 +85,7 @@ mode (mode)
 		case PLAYBACK:
 			if (jack)
 				jdevice =
-					new JackClient ("jacktrip",//APP_NAME, //*JPC Hack, need to fix later
+					new JackClient (APP_NAME,
 							audioInfo->
 							getNumChans (),
 							audioInfo->
@@ -106,7 +106,7 @@ mode (mode)
 		case DUPLEX:
 			if (jack)
 				jdevice =
-					new JackClient ("jacktrip",//APP_NAME, //*JPC Hack, need to fix later
+					new JackClient (APP_NAME,
 							audioInfo->
 							getNumChans (),
 							audioInfo->
@@ -172,8 +172,7 @@ mode (mode)
 	{
 		readLock = new QSemaphore (1);
 		writeLock = new QSemaphore (1);
-		//(*writeLock)++;	// lock out write, to start with read
-		(*writeLock).acquire(); //****JPC qt4 porting******
+		(*writeLock)++;	// lock out write, to start with read
 	}
 
 	if (jack)
@@ -241,8 +240,7 @@ AudioDevice::bufferPtrs (void *jib, void *job)
 void
 AudioDevice::unlockRead ()
 {
-  //(*readLock)--;		// so audio input thread will unblock when stopped
-	(*readLock).release();//****JPC qt4 porting******
+	(*readLock)--;		// so audio input thread will unblock when stopped
 }
 
 void
@@ -254,11 +252,9 @@ AudioDevice::readBuffer (void *to)
 		cerr << "ERROR: AudioDevice::readBuffer called on device in PLAYBACK mode!" << endl;
 	}
 	
-	//(*readLock)++;
-		(*readLock).acquire();//****JPC qt4 porting******
+		(*readLock)++;
 		memcpy (to, buffer, bytesPerBuffer);
-		//(*writeLock)--;
-		(*writeLock).release();//****JPC qt4 porting******
+		(*writeLock)--;
 	
 }
 
@@ -272,12 +268,10 @@ AudioDevice::writeBuffer (void *from)
 	if (harp == false)
 	{
 		
-	  //(*writeLock)++;
-			(*writeLock).acquire();//****JPC qt4 porting******
+			(*writeLock)++;
 			memcpy (buffer, from, bytesPerBuffer);
 			tick (); // calls tickstream, blocks
-			//(*readLock)--;
-			(*readLock).release();//****JPC qt4 porting******
+			(*readLock)--;
 		
 	}
 	else

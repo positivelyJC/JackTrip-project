@@ -11,7 +11,7 @@
 #include "string.h"
 #include "audioDevice.h"
 #include "qstring.h"
-#include <q3textstream.h>
+#include <qtextstream.h>
 jack_port_t **input_port;
 jack_port_t **output_port;
 jack_default_audio_sample_t **inBufPtr;
