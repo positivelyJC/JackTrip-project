@@ -41,7 +41,6 @@ maxSeq (maxSeq)
 
 	prepareReaderWriter ();
 	dataLock = new QSemaphore (1);
-	//cout << (*dataLock).available() << endl;
 	secondTry = false;
 }
 
@@ -94,8 +93,7 @@ CircularBuffer::write (const void *writeChunk)
 		this->overflowReset ();
 	}
 	if (blockOnEmpty)
-	  //(*readSemaphore)--;
-	  (*readSemaphore).release();//****JPC qt4 porting******
+		(*readSemaphore)--;
 	return chunkSize;
 }
 
@@ -104,8 +102,7 @@ CircularBuffer::writeRedundant (const void *writeChunk, int z, int seq)
 {
 //      if (isFull () == false)
 	{
-	  //(*dataLock)++;
-	(*dataLock).acquire();//****JPC qt4 porting******
+	(*dataLock)++;
 		int tmpPosition = writePosition - z;
 		if (tmpPosition < 0)
 		{
@@ -127,13 +124,10 @@ CircularBuffer::writeRedundant (const void *writeChunk, int z, int seq)
 //              cout << "seq " << seq  <<"\t";
 		if (z == 0)
 			writePosition = ++writePosition % numBufChunks;
-		//(*dataLock)--;
-		(*dataLock).release();//****JPC qt4 porting******
+	(*dataLock)--;
 	}
-	if (blockOnEmpty) {
-	  //(*readSemaphore)--;
-	  (*readSemaphore).release();//****JPC qt4 porting******
-	}
+	if (blockOnEmpty)
+		(*readSemaphore)--;
 //      return chunkSize;
 	return writePosition;
 }
@@ -143,8 +137,7 @@ CircularBuffer::read (void *readChunk)
 {
 	if (blockOnEmpty)
 	{
-	  //(*readSemaphore)++;
-	  (*readSemaphore).acquire();//****JPC qt4 porting******
+		(*readSemaphore)++;
 
 
 		if (isEmpty () == false)
@@ -165,8 +158,7 @@ CircularBuffer::read (void *readChunk)
 	{			// not blockOnEmpty
 		if (lastSeq == -1)
 			lastSeq = 0;
-		//(*dataLock)++;
-		(*dataLock).acquire();//****JPC qt4 porting******
+	(*dataLock)++;
 		int nextSeq = (lastSeq + 1) % maxSeq;
 		int i = 0;
 		int lag = -maxSeq;
@@ -196,8 +188,7 @@ CircularBuffer::read (void *readChunk)
 		memcpy (readChunk,
 			(void *) ((char *) cbBuffer +
 				  bestReadPosition * chunkSize), chunkSize);
-		//(*dataLock)--;
-		(*dataLock).release();//****JPC qt4 porting******
+	(*dataLock)--;
 	}
 	if (blockOnEmpty)
 		return chunkSize;
@@ -208,20 +199,17 @@ CircularBuffer::read (void *readChunk)
 /** Full if writer is one circular position behind the reader. */
 bool CircularBuffer::isFull ()
 {
-  //(*dataLock)++;
-	(*dataLock).acquire();//****JPC qt4 porting******
+	(*dataLock)++;
 	// cerr << "(" << writePosition << "," << readPosition << ") ";
 	// cerr << ((readPosition + numChunks - writePosition) % numChunks) << endl;
 	if (writePosition == (readPosition + numBufChunks - 1) % numBufChunks)
 	{
-	  //(*dataLock)--;
-		(*dataLock).release();//****JPC qt4 porting******
+		(*dataLock)--;
 		return true;
 	}
 	else
 	{
-	  //(*dataLock)--;
-		(*dataLock).release();//****JPC qt4 porting******
+		(*dataLock)--;
 		return false;
 	}
 }
@@ -230,18 +218,15 @@ bool CircularBuffer::isFull ()
 /** Empty if writer is equal to reader */
 bool CircularBuffer::isEmpty ()
 {
-  //(*dataLock)++;
-	(*dataLock).acquire();//****JPC qt4 porting******
+	(*dataLock)++;
 	if (writePosition == readPosition)
 	{
-	  //(*dataLock)--;
-		(*dataLock).release();//****JPC qt4 porting******
+		(*dataLock)--;
 		return true;
 	}
 	else
 	{
-	  //(*dataLock)--;
-		(*dataLock).release();//****JPC qt4 porting******
+		(*dataLock)--;
 		return false;
 	}
 }
@@ -250,8 +235,7 @@ void
 CircularBuffer::prepareReaderWriter ()
 {
 	readSemaphore = new QSemaphore (1);
-	//(*readSemaphore)++;
-	(*readSemaphore).acquire();//****JPC qt4 porting******
+	(*readSemaphore)++;
 	fillChunksWithZeros (0, numBufChunks / 2 - 1);
 }
 
@@ -265,10 +249,8 @@ CircularBuffer::fillChunksWithZeros (int from, int to)
 	{
 		memset (((char *) cbBuffer + writePosition * chunkSize), 0,
 			chunkSize);
-		if (blockOnEmpty) {
-		  //(*readSemaphore)--;
-		  (*readSemaphore).release();//****JPC qt4 porting******
-		}
+		if (blockOnEmpty)
+			(*readSemaphore)--;
 	}
 	writePosition = writePosition % numBufChunks;
 	readPosition = from;
@@ -281,12 +263,10 @@ CircularBuffer::underrunReset ()
 		cerr << "----output- underflow!!" << endl;
 	else
 		cerr << "-input--- underflow!!" << endl;
-	//(*dataLock)++;
-	(*dataLock).acquire();//****JPC qt4 porting******
+	(*dataLock)++;
 	delete readSemaphore;
 	prepareReaderWriter ();
-	//(*dataLock)--;
-	(*dataLock).release();//****JPC qt4 porting******
+	(*dataLock)--;
 }
 
 void
@@ -297,9 +277,7 @@ CircularBuffer::overflowReset ()
 	else
 		cerr << "-input--- Overflow!" << endl;
 
-	//(*dataLock)++;
-	(*dataLock).acquire();//****JPC qt4 porting******
+	(*dataLock)++;
 	readPosition = (writePosition + (numBufChunks / 2)) % numBufChunks;
-	//(*dataLock)--;
-	(*dataLock).release();//****JPC qt4 porting******
+	(*dataLock)--;
 }

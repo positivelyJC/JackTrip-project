@@ -3,8 +3,7 @@
 #define INCLUDED_CIRCULARBUFFER
 
 #include <qthread.h>
-//#include <qsemaphore.h>//***JPC Port to qt4*****************
-#include <QSemaphore>
+
 /**
  * @brief Provides a circular buffer that can be written to and read
  * from asynchronously.
@@ -38,9 +37,9 @@ class CircularBuffer {
  int *seqBuffer;
 	private:   
  //   Semaphore   *writeSemaphore;  /**< Locks write access. */
-    QSemaphore  *readSemaphore;   /**< Locks read access. */
-    QSemaphore  *dataLock;        /**< Locks access to state variables. */
-public:
+    QSemaphore   *readSemaphore;   /**< Locks read access. */
+    QSemaphore   *dataLock;        /**< Locks access to state variables. */
+public: 
  bool         isOpen;          /**< Is the CircularBuffer ready to be read/written? */
      
     bool isEmpty();
