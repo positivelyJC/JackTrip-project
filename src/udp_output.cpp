@@ -14,23 +14,17 @@ audInfo (audInfo)
 {
 	bpp = netInfo->getDataBytesPerPacket ();
 	char localhostbuf[100];
-	//sock = new Q3SocketDevice (Q3SocketDevice::Datagram);//***JPC Port to qt4*****************
-	//sock->setAddressReusable(true);//***JPC Port to qt4*****************
-	sock = new QUdpSocket;
-
+	sock = new Q3SocketDevice (Q3SocketDevice::Datagram);
+	sock->setAddressReusable(true);
 	if (gethostname (localhostbuf, 99))
 	{
 		perror ("gethostname");
 		exit ();
 	}
-	
 	QHostAddress *ha = new QHostAddress ();
-	QString *s = IPv4Addr (localhostbuf);
-	//cout << "AAAAAAAAA" << (*s).latin1() << endl;
+	QString *s = IPv4Addr (localhostbuf);	// dotted integer from name
 	ha->setAddress (*s);
-	cout << "AAAAAAAAA" << (*ha).toString ().latin1() << endl;
-	//if (!(sock->bind (*ha, netInfo->getOutPort ())))//***JPC Port to qt4*****************
-	if (!(sock->bind (*ha, netInfo->getOutPort (), QUdpSocket::ShareAddress ) ) )//***JPC Port to qt4*****************
+	if (!(sock->bind (*ha, netInfo->getOutPort ())))
 	{
 		perror ("bind\n");
 		exit ();
@@ -59,13 +53,6 @@ audInfo (audInfo)
 
 }
 
-UDPOutput::~UDPOutput()
-{
-  //delete sock;
-}
-
-
-
 void
 UDPOutput::Initial ()
 {
@@ -81,12 +68,10 @@ UDPOutput::connect (QHostAddress remote)
 		exit ();
 	}
 	// sets peerAddress   
-	//sock->connect (remote, netInfo->getInPort ()); //***JPC Port to qt4*****************
-	sock->connectToHost (remote, netInfo->getInPort ()); //***JPC Port to qt4*****************
-
+	sock->connect (remote, netInfo->getInPort ());
 	//**************JPC COMENTED OUT*******************
-	cout << "Connecting to " << remote.toString().latin1() << ":" << netInfo->
-		getInPort () << endl;
+	//cout << "Connecting to " << remote.toString () << ":" << netInfo->
+	//	getInPort () << endl;
 	//*************************************************
 	return 0;
 }
@@ -107,13 +92,9 @@ UDPOutput::send (char *buf)
 
 		memcpy (datapart, buf, bpp);
 
-		//int rv = sock->writeBlock (packetData, wholeSize,//***JPC Port to qt4*****************
-		//		       sock->peerAddress (),//***JPC Port to qt4*****************
-		//		       sock->peerPort ());//***JPC Port to qt4*****************
-		int rv = sock->writeDatagram (packetData, wholeSize,//***JPC Port to qt4*****************
-				       sock->peerAddress (),//***JPC Port to qt4*****************
-				       sock->peerPort ());//***JPC Port to qt4*****************
-		//cout << "WRITING!!!!!!!!!!! " << rv  <<" "<< QString(sock->peerName ()).latin1() << " " << sock->peerPort ()<< endl;
+		int rv = sock->writeBlock (packetData, wholeSize,
+				       sock->peerAddress (),
+				       sock->peerPort ());
 	return rv;
 }
 
@@ -181,10 +162,11 @@ UDPOutput::stop ()
 
 void UDPOutput::plotVal (double v)
 {
-    if(_rcvr!=NULL)
-    {
-    ThreadCommEvent *e = new ThreadCommEvent (v, -1.0, 0.0);
-    QApplication::postEvent (_rcvr, e);	// to app event loop
-    }
+	if(_rcvr!=NULL)
+	{
+ThreadCommEvent *e = new ThreadCommEvent (v,
+								  -1.0,
+								  0.0);
+			QApplication::postEvent (_rcvr, e);	// to app event loop
+	}
 }
-
