@@ -168,22 +168,22 @@ public:
   {
     mLocalIncomingPort = port;
     mPeerIncomingPort = port;
-    mLocalOutgoingPort = port + 1;
-    mPeerOutgoingPort = port + 1;
+    mLocalOutgoingPort = port;
+    mPeerOutgoingPort = port;
   }
   /// \brief Sets port numbers for the local machine.
   /// Incoming port is <tt>port</tt> and outgoing ports are <tt>port+1</tt>
   void setLocalPorts(int port)
   {
     mLocalIncomingPort = port;
-    mLocalOutgoingPort = port + 1;
+    mLocalOutgoingPort = port;
   }
   /// \brief Sets port numbers for the peer (remote) machine.
   /// Incoming port is <tt>port</tt> and outgoing ports are <tt>port+1</tt>
   void setPeerPorts(int port)
   {
     mPeerIncomingPort = port;
-    mPeerOutgoingPort = port + 1;
+    mPeerOutgoingPort = port;
   }
   //@}
   //------------------------------------------------------------------------------------

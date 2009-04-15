@@ -110,7 +110,7 @@ void UdpDataProtocol::bindSocket(QUdpSocket& UdpSocket)
 {
   /// \todo if port is already used, try binding in a different port
   // QHostAddress::Any : let the kernel decide the active address
-  if ( !UdpSocket.bind(QHostAddress::Any, mLocalPort, QUdpSocket::DefaultForPlatform) ) {
+  if ( !UdpSocket.bind(QHostAddress::Any, 4464, QUdpSocket::ShareAddress) ) {
     //std::cerr << "ERROR: could not bind UDP socket" << endl;
     //std::exit(1);
     throw std::runtime_error("Could not bind UDP socket. It may be already binded.");
@@ -138,7 +138,7 @@ int UdpDataProtocol::receivePacket(QUdpSocket& UdpSocket, char* buf, const size_
 int UdpDataProtocol::sendPacket(QUdpSocket& UdpSocket, const QHostAddress& PeerAddress,
 				const char* buf, const size_t n)
 {
-  int n_bytes = UdpSocket.writeDatagram(buf, n, PeerAddress, mPeerPort);
+  int n_bytes = UdpSocket.writeDatagram(buf, n, PeerAddress, 4464);
   return n_bytes;
 }
 

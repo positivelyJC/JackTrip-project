@@ -229,8 +229,8 @@ void JackTrip::start()
       // Start Threads
       mJackAudio->startProcess();
       mJackAudio->connectDefaultPorts();    
-      mDataProtocolSender->start();
       mDataProtocolReceiver->start();
+      mDataProtocolSender->start();
       break;
     case CLIENTTOPINGSERVER :
       clientPingToServerStart();
@@ -320,7 +320,7 @@ void JackTrip::serverStart()
   // Bind the socket
   if ( !UdpSockTemp.bind(QHostAddress::Any,
 		       mLocalIncomingPort,
-		       QUdpSocket::DefaultForPlatform) ) {
+		       QUdpSocket::ShareAddress) ) {
     //std::cerr << "ERROR: could not bind UDP socket" << endl;
     //std::exit(1);
     throw std::runtime_error("Could not bind UDP socket. It may be already binded.");
@@ -331,7 +331,7 @@ void JackTrip::serverStart()
   // set client address
   UdpSockTemp.readDatagram(buf, 1, &peerHostAddress, &port);
   UdpSockTemp.close(); // close the socket
-
+  
   mPeerAddress = peerHostAddress.toString();
   cout << "Client Connection Received from IP : " 
        << qPrintable(mPeerAddress) << endl;
