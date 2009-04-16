@@ -68,7 +68,8 @@ UdpDataProtocol::UdpDataProtocol(JackTrip* jacktrip, const runModeT runmode,
     		     jacktrip, SLOT(slotUdpWatingTooLong(int)), Qt::QueuedConnection);
   }
   else if (mRunMode == SENDER) {
-    mLocalPort = outgoing_port;
+    //mLocalPort = outgoing_port;
+    mLocalPort = 4464;
     mPeerPort = incoming_port;
   }
 }
