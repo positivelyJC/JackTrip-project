@@ -199,7 +199,8 @@ void JackTrip::appendProcessPlugin(ProcessPlugin* plugin)
 
 
 //*******************************************************************************
-void JackTrip::start()
+//void JackTrip::start()
+void JackTrip::run()
 {
   // Check if ports are already binded by another process on this machine
   checkIfPortIsBinded(mReceiverBindPort);
@@ -236,6 +237,14 @@ void JackTrip::start()
   mJackAudio->connectDefaultPorts();
   mDataProtocolSender->start();
   mDataProtocolReceiver->start();
+  //cout << "*****AFTERWAITING STARTING JACKTRIP THREADS******" << endl;
+  //emit signalAllThreadsRunning();
+  //mDataProtocolSender->wait();
+  //mDataProtocolReceiver->wait();
+  //cout << "*****AFTERWAITING JACKTRIP MAIN THREAD******" << endl;
+
+  //wait();
+  //cout << "EXITING RUNLOOP" << endl;
 }
 
 
@@ -405,7 +414,16 @@ void JackTrip::createHeader(const DataProtocol::packetHeaderTypeT headertype)
 //*******************************************************************************
 void JackTrip::putHeaderInPacket(int8_t* full_packet, int8_t* audio_packet)
 {
-  mPacketHeader->fillHeaderCommonFromAudio();
+  try {
+    mPacketHeader->fillHeaderCommonFromAudio();
+  }
+  catch (const std::exception & e) {
+    //stop();
+    emit signalException(e.what());
+    //emit signalException("******SUPEREXCTREMECACUMEN*******");
+    //exit();
+  }
+  //mPacketHeader->fillHeaderCommonFromAudio();
   mPacketHeader->putHeaderInPacket(full_packet);
   
   int8_t* audio_part;

@@ -121,7 +121,8 @@ public:
   void appendProcessPlugin(ProcessPlugin* plugin);
 
   /// \brief Start the processing threads
-  void start();
+  //void start();
+  void run();
 
   /// \brief Stop the processing threads
   void stop();
@@ -258,6 +259,9 @@ signals:
   void signalProcessesStopped();
   /// \brieg Signal emitted when no UDP Packets have been received for a while
   void signalNoUdpPacketsForSeconds();
+  void signalException(QString exep_message);
+
+  void signalAllThreadsRunning();
 
 
 private:

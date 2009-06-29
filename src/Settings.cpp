@@ -45,6 +45,7 @@
 #include <iostream>
 #include <getopt.h> // for command line parsing
 #include <cstdlib>
+#include <stdexcept>
 
 #include "ThreadPoolTest.h"
 
@@ -74,7 +75,9 @@ Settings::Settings() :
 //*******************************************************************************
 Settings::~Settings()
 {
-  stopJackTrip();
+  cout << "~Settings *******************" << endl;
+  //mJackTrip->wait();
+  //mJackTrip->stop();
   delete mJackTrip;
 }
 
@@ -363,8 +366,17 @@ void Settings::startJackTrip()
       // -------------------------------------------------------------
     }
     
+    QObject::connect(mJackTrip, SIGNAL(signalException(QString)),
+                    this, SLOT(testPrint(QString)), Qt::QueuedConnection);
+
     // Start JackTrip
     mJackTrip->start();
+    //cout << "Is RUNNING ========= " << mJackTrip->isRunning() << endl;
+    //QThread::sleep(1);
+    //cout << "Is RUNNING ========= " << mJackTrip->isRunning() << endl;
+
+    //cout << "AFTER SLEEPING" << endl;
+    //mJackTrip->wait();
     
     /* 
        sleep(10);
@@ -379,4 +391,38 @@ void Settings::startJackTrip()
 void Settings::stopJackTrip()
 {
   mJackTrip->stop();
+  mJackTrip->wait();
+}
+
+
+//*******************************************************************************
+void Settings::waitJackTrip()
+{
+  //QThread::sleep(1);
+  //mJackTrip->wait();
+}
+
+
+//*******************************************************************************
+void Settings::testPrint(QString exp_message)
+{
+
+  mJackTrip->stop();
+  mJackTrip->wait();
+  cout << exp_message.toStdString() << endl;
+  //cout << "2" << exp_message.toStdString() << endl;
+  //cout << "3" << exp_message.toStdString() << endl;
+  //emit signalexitQCoreApp();
+  std::exit(0);
+
+  //cout << "Is RUNNING ========= " << mJackTrip->isRunning() << endl;
+  //mJackTrip->stop();
+  //mJackTrip->wait();
+  //cout << " *****&&&&&&&&&&&&&&&&&&&& mJackTrip->exit();" << endl;
+  //mJackTrip->wait();
+  //cout << " *****&&&&&&&&&&&&&&&&&&&& mJackTrip->mJackTrip->wait();" << endl;
+  //cout << exp_message.toStdString() << endl;
+  //mJackTrip->stop();
+  //mJackTrip->wait();
+  //throw std::invalid_argument("SUPERCACUMEN");
 }

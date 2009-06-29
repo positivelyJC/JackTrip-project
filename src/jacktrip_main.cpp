@@ -66,21 +66,41 @@ int main(int argc, char** argv)
 
   // Get Settings from user
   // ----------------------
+   //Settings* settings = new Settings;
+   //settings->parseInput(argc, argv);
+   //settings->startJackTrip();
+   //settings->stopJackTrip();
+   Settings settings;
+   QObject::connect(&settings, SIGNAL(signalexitQCoreApp()),
+                    &app, SLOT(exit()), Qt::QueuedConnection);
+   settings.parseInput(argc, argv);
+   settings.startJackTrip();
+   settings.waitJackTrip();
+
+   cout << "****** AFTER MAIN settings->startJackTrip(); ******************" << endl;
+
+   //return 0;
+   //QObject::connect(&settings, SIGNAL(signalexitQCoreApp()),
+    //                &app, SLOT(exit()), Qt::QueuedConnection);
+
+   //return 0;
+   /*
   try 
     {
-      // Get Settings from user
-      // ----------------------
-      Settings* settings = new Settings;
-      settings->parseInput(argc, argv);
-      settings->startJackTrip();
+
+
     }
   catch ( const std::exception & e )
     {
+    //settings->stopJackTrip();
+
       std::cerr << "ERROR:" << endl;
       std::cerr << e.what() << endl;
       std::cerr << "Exiting JackTrip..." << endl;
       std::cerr << gPrintSeparator << endl;
-      return -1;
+      //return -1;
     }
+    */
+
   return app.exec();
 }

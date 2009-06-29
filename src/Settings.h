@@ -45,8 +45,10 @@
 
 /** \brief Class to set usage options and parse settings from input
  */
-class Settings
+class Settings : public QThread
 {
+  Q_OBJECT;
+
 public:
   Settings();
   virtual ~Settings();
@@ -57,10 +59,22 @@ public:
   void startJackTrip();
   void stopJackTrip();
 
+  bool isFinished() const
+  { return mJackTrip->isFinished(); };
+
   /// \brief Prints usage help
   void printUsage();
 
   bool getLoopBack() { return mLoopBack; };
+
+  void Settings::waitJackTrip();
+
+signals:
+  void signalexitQCoreApp();
+
+public slots:
+
+  void testPrint(QString exp_message);
 
 private:
   JackTrip* mJackTrip; ///< JackTrip class
