@@ -290,6 +290,9 @@ void UdpDataProtocol::run()
       uint16_t last_seq_num = 0;    // Store last package sequence number
       uint16_t newer_seq_num = 0;   // Store newer sequence number
 
+      uint16_t seq1 = 0;
+      uint16_t seq2 = 0;
+
       while ( !mStopped )
       {
         // Timer to report packets arriving too late
@@ -312,6 +315,8 @@ void UdpDataProtocol::run()
         mJackTrip->writeAudioBuffer(mAudioPacket);
         */
         //----------------------------------------------------------------------------------
+	seq1 = current_seq_num;
+	cout << "SEQ1 = " << seq1 << endl;
         receivePacketRedundancy(UdpSocket,
                                full_redundant_packet,
                                full_redundant_packet_size,
@@ -319,6 +324,14 @@ void UdpDataProtocol::run()
                                current_seq_num,
                                last_seq_num,
                                newer_seq_num);
+	seq2 = current_seq_num;
+	cout << "SEQ2 = " << current_seq_num << endl;
+	cout << "DIFF (SEQ2-SEQ1) = " << seq2 - seq1 << endl;
+	
+	if ((seq2 - seq1) != 1) {
+	  cout << "ERROR IN DIFF = " << seq2 - seq1 << endl;
+	}
+	
       }
       break; }
 
