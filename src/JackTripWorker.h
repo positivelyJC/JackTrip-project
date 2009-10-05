@@ -47,6 +47,7 @@
 #include <QMutex>
 
 #include "JackTrip.h"
+#include "JamTest.h"
 
 //class JackTrip; // forward declaration
 class UdpMasterListener; // forward declaration

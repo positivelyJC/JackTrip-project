@@ -132,6 +132,8 @@ public:
   /// \brief The class destructor
   virtual ~JackTrip();
 
+  void run() {}
+
   /// \brief Set the Peer Address for jacktripModeT::CLIENT mode only
   virtual void setPeerAddress(const char* PeerHostOrIP);
 

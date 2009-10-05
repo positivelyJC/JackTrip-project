@@ -53,7 +53,7 @@ using std::cout; using std::endl;
 
 //*******************************************************************************
 UdpMasterListener::UdpMasterListener(int server_port) :
-    //mJTWorker(NULL),
+    //mJTWorkers(NULL),
     mServerPort(server_port),
     mStopped(false),
     mTotalRunningThreads(0)
@@ -86,7 +86,7 @@ UdpMasterListener::UdpMasterListener(int server_port) :
 UdpMasterListener::~UdpMasterListener()
 {
   mThreadPool.waitForDone();
-  //delete mJTWorker;
+  ////////delete mJTWorker;
   for (int i = 0; i<gMaxThreads; i++) {
     delete mJTWorkers->at(i);
   }
@@ -102,6 +102,11 @@ UdpMasterListener::~UdpMasterListener()
 void UdpMasterListener::run()
 {
   mStopped = false;
+
+  QVector<JackTripWorker*> JTWorkers;
+  for (int i = 0; i<gMaxThreads; i++) {
+    JTWorkers.insert(i, NULL);
+  }
 
   QHostAddress PeerAddress; // Object to store peer address
   int peer_udp_port; // Peer listening port
@@ -143,10 +148,17 @@ void UdpMasterListener::run()
       int id_remove;
       id_remove = getPoolID(PeerAddress.toIPv4Address(), peer_udp_port);
       // stop the thread
-      mJTWorkers->at(id_remove)->stopThread();
+      cout << "---> BEFORE mJTWorkers->at(id_remove)->stopThread()" << endl;
+      ////////mJTWorkers->at(id_remove)->stopThread(); // #### BUG SEGFAULT HAPPENS HERE ########
+      JTWorkers.at(id_remove)->stopThread();
+      cout << "---> AFTER mJTWorkers->at(id_remove)->stopThread()" << endl;
+
       // block until the thread has been removed from the pool
-      while ( isNewAddress(PeerAddress.toIPv4Address(), peer_udp_port) == -1 )
-      { cout << "removing" << endl; QThread::msleep(10); }
+      while ( isNewAddress(PeerAddress.toIPv4Address(), peer_udp_port) == -1 ) {
+        cout << "---> removing" << endl;
+        QThread::msleep(10);
+      }
+      cout << "---> AFTER WHILE removing" << endl;
       // Get a new ID for this client
       id = isNewAddress(PeerAddress.toIPv4Address(), peer_udp_port);
     }
@@ -162,16 +174,28 @@ void UdpMasterListener::run()
     // Spawn Thread to Pool
     // --------------------
     // Register JackTripWorker with the master listener
-    delete mJTWorkers->at(id); // just in case the Worker was previously created
-    mJTWorkers->replace(id, new JackTripWorker(this));
+    //delete mJTWorkers->at(id); // just in case the Worker was previously created
+    //mJTWorkers->replace(id, new JackTripWorker(this));
+    delete JTWorkers.at(id); // just in case the Worker was previously created
+    JTWorkers.replace(id, new JackTripWorker(this));
     // redirect port and spawn listener
+    //cout << "---> mActiveAddress[id][0] = " << mActiveAddress[id][0] << endl;
+    /*
     mJTWorkers->at(id)->setJackTrip(id, mActiveAddress[id][0],
                                     server_udp_port, mActiveAddress[id][1],
                                     1); /// \todo temp default to 1 channel
+                                    */
+    JTWorkers.at(id)->setJackTrip(id, mActiveAddress[id][0],
+                                    server_udp_port, mActiveAddress[id][1],
+                                    1); /// \todo temp default to 1 channel
+    //cout << "---> mActiveAddress[id][0] 2 = " << mActiveAddress[id][0] << endl;
     //send one thread to the pool
-    mThreadPool.start(mJTWorkers->at(id), QThread::TimeCriticalPriority);
+    /////////////mThreadPool.start(mJTWorkers->at(id), QThread::TimeCriticalPriority);
+    mThreadPool.start(JTWorkers.at(id), QThread::TimeCriticalPriority);
+    //cout << "---> mActiveAddress[id][0] 388888 = " << mActiveAddress[id][0] << endl;
     // wait until one is complete before another spawns
-    while (mJTWorkers->at(id)->isSpawning()) { QThread::msleep(10); }
+    /////////////while (mJTWorkers->at(id)->isSpawning()) { QThread::msleep(10); }
+    while (JTWorkers.at(id)->isSpawning()) { QThread::msleep(10); }
     mTotalRunningThreads++;
     cout << "Total Running Threads:  " << mTotalRunningThreads << endl;
     cout << "=======================================================" << endl;

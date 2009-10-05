@@ -112,6 +112,7 @@ JackTrip::~JackTrip()
   delete mPacketHeader;
   delete mSendRingBuffer;
   delete mReceiveRingBuffer;
+  cout << "---> AFTER ~JackTrip()" << endl;
 }
 
 
@@ -255,7 +256,11 @@ void JackTrip::setupRingBuffers()
 //*******************************************************************************
 void JackTrip::setPeerAddress(const char* PeerHostOrIP)
 {
+  cout << "---> BEFORE JackTrip::setPeerAddress(const char* PeerHostOrIP)" << endl;
   mPeerAddress = PeerHostOrIP;
+  //mPeerAddress.append(PeerHostOrIP);
+  cout << mPeerAddress.toStdString() << endl;
+  cout << "---> AFTER JackTrip::setPeerAddress(const char* PeerHostOrIP)" << endl;
 }
 
 
@@ -276,18 +281,25 @@ void JackTrip::startProcess() throw(std::invalid_argument)
             exit(1);
         }
 #endif
+  cout << "---> BEFORE startProcess in JACKTRIP" << endl;
   // Check if ports are already binded by another process on this machine
   // ------------------------------------------------------------------
   checkIfPortIsBinded(mReceiverBindPort);
   checkIfPortIsBinded(mSenderBindPort);
   // Set all classes and parameters
   // ------------------------------
+  cout << "---> BEFORE setupAudio" << endl;
   setupAudio();
+  cout << "---> BEFORE createHeader" << endl;
   createHeader(mPacketHeaderType);
+  cout << "---> BEFORE setupDataProtocol" << endl;
   setupDataProtocol();
+  cout << "---> BEFORE setupRingBuffers" << endl;
   setupRingBuffers();
+  cout << "---> AFTER setupRingBuffers" << endl;
   // Connect Signals and Slots
   // -------------------------
+  cout << "---> BEFORE Signals and Slots" << endl;
   QObject::connect(mPacketHeader, SIGNAL(signalError(const char*)),
                    this, SLOT(slotStopProcesses()), Qt::QueuedConnection);
   QObject::connect(mDataProtocolReceiver, SIGNAL(signalReceivedConnectionFromPeer()),
@@ -298,6 +310,7 @@ void JackTrip::startProcess() throw(std::invalid_argument)
   //QObject::connect(mDataProtocolReceiver, SIGNAL(signalError(const char*)),
   //                 this, SLOT(slotStopProcesses()), Qt::QueuedConnection);
 
+  cout << "---> BEFORE switch" << endl;
   // Start the threads for the specific mode
   // ---------------------------------------
   switch ( mJackTripMode )
@@ -326,12 +339,14 @@ void JackTrip::startProcess() throw(std::invalid_argument)
   mDataProtocolReceiver->start();
   QThread::msleep(1);
   mDataProtocolSender->start();
+  cout << "---> AFTER startProcess in JACKTRIP" << endl;
 }
 
 
 //*******************************************************************************
 void JackTrip::stop()
 {
+  cout << "---> STOPPING JACKTRIP JackTrip::stop()" << endl;
   // Stop The Sender
   mDataProtocolSender->stop();
   mDataProtocolSender->wait();
